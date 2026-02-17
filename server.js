@@ -1,0 +1,61 @@
+require('dotenv').config();
+const express = require('express');
+const Stripe = require('stripe');
+const cors = require('cors');
+
+const app = express();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+// 🔴 IMPORTANT: Webhook route FIRST (before express.json)
+app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  const sig = req.headers['stripe-signature'];
+
+  try {
+    const event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET,
+    );
+
+    console.log('Webhook received:', event.type);
+    res.json({ received: true });
+  } catch (err) {
+    console.log('Webhook error:', err.message);
+    res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+});
+
+// ✅ Normal middleware AFTER webhook
+app.use(cors());
+app.use(express.json());
+
+// 1️⃣ Verify subscription endpoint
+app.post('/verify', async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const customers = await stripe.customers.list({
+      email: email,
+      limit: 1,
+    });
+
+    if (!customers.data.length) {
+      return res.json({ subscribed: false });
+    }
+
+    const subscriptions = await stripe.subscriptions.list({
+      customer: customers.data[0].id,
+      status: 'active',
+    });
+
+    const isSubscribed = subscriptions.data.length > 0;
+
+    res.json({ subscribed: isSubscribed });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
