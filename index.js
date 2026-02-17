@@ -7,23 +7,62 @@ const app = express();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 // 🔴 IMPORTANT: Webhook route FIRST (before express.json)
-app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
-  const sig = req.headers['stripe-signature'];
+// app.post('/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+//   const sig = req.headers['stripe-signature'];
 
-  try {
-    const event = stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET,
-    );
+//   try {
+//     const event = stripe.webhooks.constructEvent(
+//       req.body,
+//       sig,
+//       process.env.STRIPE_WEBHOOK_SECRET,
+//     );
 
-    console.log('Webhook received:', event.type);
-    res.json({ received: true });
-  } catch (err) {
-    console.log('Webhook error:', err.message);
-    res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-});
+//     console.log('Webhook received:', event.type);
+//     res.json({ received: true });
+//   } catch (err) {
+//     console.log('Webhook error:', err.message);
+//     res.status(400).send(`Webhook Error: ${err.message}`);
+//   }
+// });
+
+// 🔴 Webhook route
+app.post(
+  '/webhook',
+  express.raw({ type: 'application/json' }),
+  async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+
+    try {
+      const event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET,
+      );
+
+      console.log('Webhook received:', event.type);
+
+      // ✅ Handle checkout session completed
+      if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+        const email = session.customer_email;
+        console.log(`Payment successful for ${email}`);
+
+        // For testing: mark subscription true
+        // You can store this in a DB or local storage for the Chrome extension
+        // Example: just log for now
+        console.log(`💡 Set isSubscribed = true for ${email}`);
+
+        // If you had a database, you could do:
+        // await db.users.update({ email }, { subscribed: true });
+      }
+
+      res.json({ received: true });
+    } catch (err) {
+      console.log('Webhook error:', err.message);
+      res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+  },
+);
 
 // ✅ Normal middleware AFTER webhook
 app.use(cors());
