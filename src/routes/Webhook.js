@@ -45,6 +45,7 @@ router.post('/', async (req, res) => {
           isSubscribed: true,
           stripeCustomerId: session.customer,
           licenseKey: generatedKey,
+          stripeSubscriptionId: session.subscription,
         },
         { upsert: true },
       );

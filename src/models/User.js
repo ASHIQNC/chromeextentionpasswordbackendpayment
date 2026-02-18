@@ -5,6 +5,7 @@ const UserSchema = new mongoose.Schema({
   stripeCustomerId: String,
   isSubscribed: { type: Boolean, default: false },
   licenseKey: String,
+  stripeSubscriptionId: String,
   updatedAt: { type: Date, default: Date.now },
 });
 

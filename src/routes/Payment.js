@@ -25,4 +25,32 @@ router.post('/verify-key', async (req, res) => {
   }
 });
 
+router.post('/cancel-subscription', async (req, res) => {
+  const { licenseKey } = req.body;
+
+  try {
+    const user = await User.findOne({ licenseKey });
+
+    if (!user || !user.stripeSubscriptionId) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Subscription not found' });
+    }
+
+    // This cancels the subscription at the end of the current billing month
+    await stripe.subscriptions.update(user.stripeSubscriptionId, {
+      cancel_at_period_end: true,
+    });
+
+    // Update your database immediately so the key stops working
+    user.isSubscribed = false;
+    await user.save();
+
+    res.json({ success: true, message: 'Subscription canceled successfully' });
+  } catch (error) {
+    console.error('Stripe Error:', error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+});
+
 module.exports = router;
