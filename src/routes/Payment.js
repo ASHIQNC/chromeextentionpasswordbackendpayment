@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
 
-// POST /api/payments/verify-key
+// Extension hits THIS: POST /api/payments/verify-key
 router.post('/verify-key', async (req, res) => {
   const { licenseKey } = req.body;
 
