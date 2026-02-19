@@ -40,20 +40,19 @@
 
 // module.exports = router;
 
-//working ai code
-// const express = require('express');
-// const router = express.Router();
-// const User = require('../models/User');
-// const { GoogleGenerativeAI } = require('@google/generative-ai');
+const express = require('express');
+const router = express.Router();
+const User = require('../models/User');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
-// // Check if API Key exists on startup
-// if (!process.env.GEMINI_API_KEY) {
-//   console.error(
-//     '❌ CRITICAL: GEMINI_API_KEY is missing from Environment Variables',
-//   );
-// }
+// Check if API Key exists on startup
+if (!process.env.GEMINI_API_KEY) {
+  console.error(
+    '❌ CRITICAL: GEMINI_API_KEY is missing from Environment Variables',
+  );
+}
 
-// const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // router.post('/analyze-password', async (req, res) => {
 //   const { licenseKey, passwordPattern } = req.body;
@@ -106,9 +105,6 @@
 //   }
 // });
 
-// module.exports = router;
-
-//testing code
 router.post('/analyze-password', async (req, res) => {
   const { licenseKey, passwordPattern } = req.body;
 
