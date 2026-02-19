@@ -116,7 +116,7 @@ router.post('/analyze-password', async (req, res) => {
         .json({ success: false, message: 'Pro subscription required.' });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     // 1. UPDATED PROMPT: Requesting a structured, user-friendly response
     const prompt = `Act as a friendly cybersecurity expert. 
