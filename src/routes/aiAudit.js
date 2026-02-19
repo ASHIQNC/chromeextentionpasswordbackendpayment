@@ -25,7 +25,9 @@ router.post('/analyze-password', async (req, res) => {
     Be technical but easy to understand.`;
 
     const result = await model.generateContent(prompt);
+    console.log('result', result);
     const analysis = result.response.text();
+    console.log('analyse', analysis);
 
     res.json({ success: true, analysis });
   } catch (error) {
