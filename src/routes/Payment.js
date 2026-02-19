@@ -26,28 +26,70 @@ router.post('/verify-key', async (req, res) => {
   }
 });
 
+//workingcode
+// router.post('/cancel-subscription', async (req, res) => {
+//   const { licenseKey } = req.body;
+
+//   try {
+//     const user = await User.findOne({ licenseKey });
+//     console.log('use', user);
+//     if (!user || !user.stripeSubscriptionId) {
+//       return res
+//         .status(404)
+//         .json({ success: false, message: 'Subscription not found' });
+//     }
+
+//     // This cancels the subscription at the end of the current billing month
+//     await stripe.subscriptions.update(user.stripeSubscriptionId, {
+//       cancel_at_period_end: true,
+//     });
+
+//     // Update your database immediately so the key stops working
+//     user.isSubscribed = false;
+//     await user.save();
+
+//     res.json({ success: true, message: 'Subscription canceled successfully' });
+//   } catch (error) {
+//     console.error('Stripe Error:', error);
+//     res.status(500).json({ success: false, message: error.message });
+//   }
+// });
+
+//tesitn
+//cancel immediatly and option to cancel when time period is over
 router.post('/cancel-subscription', async (req, res) => {
-  const { licenseKey } = req.body;
+  const { licenseKey, cancelType } = req.body;
 
   try {
     const user = await User.findOne({ licenseKey });
-    console.log('use', user);
+
     if (!user || !user.stripeSubscriptionId) {
       return res
         .status(404)
         .json({ success: false, message: 'Subscription not found' });
     }
 
-    // This cancels the subscription at the end of the current billing month
-    await stripe.subscriptions.update(user.stripeSubscriptionId, {
-      cancel_at_period_end: true,
+    if (cancelType === 'immediate') {
+      // Cancel immediately
+      await stripe.subscriptions.cancel(user.stripeSubscriptionId);
+    } else if (cancelType === 'period_end') {
+      // Cancel at end of billing cycle
+      await stripe.subscriptions.update(user.stripeSubscriptionId, {
+        cancel_at_period_end: true,
+      });
+    } else {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Invalid cancel type' });
+    }
+
+    res.json({
+      success: true,
+      message:
+        cancelType === 'immediate'
+          ? 'Subscription canceled immediately'
+          : 'Subscription will cancel at period end',
     });
-
-    // Update your database immediately so the key stops working
-    user.isSubscribed = false;
-    await user.save();
-
-    res.json({ success: true, message: 'Subscription canceled successfully' });
   } catch (error) {
     console.error('Stripe Error:', error);
     res.status(500).json({ success: false, message: error.message });

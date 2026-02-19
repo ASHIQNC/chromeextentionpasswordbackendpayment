@@ -292,24 +292,67 @@ router.post('/', async (req, res) => {
   }
 
   // NEW: Handle subscription updates (renewals)
+  // if (event.type === 'customer.subscription.updated') {
+  //   const subscription = event.data.object;
+  //   const customerId = subscription.customer;
+  //   const subscriptionId = subscription.id;
+
+  //   console.log(' Subscription updated:', subscriptionId);
+
+  //   try {
+  //     const user = await User.findOne({ stripeCustomerId: customerId });
+
+  //     if (user) {
+  //       user.stripeSubscriptionId = subscriptionId;
+  //       user.isSubscribed = subscription.status === 'active';
+  //       await user.save();
+  //       console.log(' User updated with subscription:', {
+  //         email: user.email,
+  //         subscriptionId,
+  //         status: subscription.status,
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error(' Error updating subscription:', error.message);
+  //   }
+  // }
+
+  //testing above is our workign  code
   if (event.type === 'customer.subscription.updated') {
     const subscription = event.data.object;
-    const customerId = subscription.customer;
-    const subscriptionId = subscription.id;
 
-    console.log(' Subscription updated:', subscriptionId);
+    console.log(' Subscription updated:', subscription.id);
 
     try {
-      const user = await User.findOne({ stripeCustomerId: customerId });
+      const user = await User.findOne({
+        stripeCustomerId: subscription.customer,
+      });
 
       if (user) {
-        user.stripeSubscriptionId = subscriptionId;
-        user.isSubscribed = subscription.status === 'active';
+        user.stripeSubscriptionId = subscription.id;
+        user.subscriptionStatus = subscription.status;
+        user.cancelAtPeriodEnd = subscription.cancel_at_period_end;
+        user.currentPeriodEnd = new Date(
+          subscription.current_period_end * 1000,
+        );
+
+        // Access logic
+        if (
+          subscription.status === 'active' ||
+          subscription.status === 'trialing'
+        ) {
+          user.isSubscribed = true;
+        } else {
+          user.isSubscribed = false;
+        }
+
         await user.save();
-        console.log(' User updated with subscription:', {
+
+        console.log(' User subscription updated:', {
           email: user.email,
-          subscriptionId,
           status: subscription.status,
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          periodEnd: user.currentPeriodEnd,
         });
       }
     } catch (error) {
@@ -318,19 +361,45 @@ router.post('/', async (req, res) => {
   }
 
   //  NEW: Handle subscription deletion (cancellation from Stripe)
+  // if (event.type === 'customer.subscription.deleted') {
+  //   const subscription = event.data.object;
+  //   const subscriptionId = subscription.id;
+
+  //   console.log(' Subscription deleted:', subscriptionId);
+  //   try {
+  //     const user = await User.findOne({ stripeSubscriptionId: subscriptionId });
+
+  //     if (user) {
+  //       user.isSubscribed = false;
+  //       await user.save();
+
+  //       console.log('User subscription cancelled:', user.email);
+  //     }
+  //   } catch (error) {
+  //     console.error(' Error handling deletion:', error.message);
+  //   }
+  // }
+
+  //testing
   if (event.type === 'customer.subscription.deleted') {
     const subscription = event.data.object;
-    const subscriptionId = subscription.id;
 
-    console.log(' Subscription deleted:', subscriptionId);
+    console.log(' Subscription deleted:', subscription.id);
+
     try {
-      const user = await User.findOne({ stripeSubscriptionId: subscriptionId });
+      const user = await User.findOne({
+        stripeSubscriptionId: subscription.id,
+      });
 
       if (user) {
         user.isSubscribed = false;
+        user.subscriptionStatus = 'canceled';
+        user.cancelAtPeriodEnd = false;
+        user.currentPeriodEnd = null;
+
         await user.save();
 
-        console.log('User subscription cancelled:', user.email);
+        console.log(' User subscription fully cancelled:', user.email);
       }
     } catch (error) {
       console.error(' Error handling deletion:', error.message);
