@@ -141,6 +141,6 @@ app.use(express.json()); // This parses JSON for all routes BELOW this line
 
 // 3. API Routes
 app.use('/api/payments', require('./routes/Payment'));
-
+app.use('/api/ai', require('./routes/aiAudit'));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
