@@ -30,7 +30,7 @@ router.post('/cancel-subscription', async (req, res) => {
 
   try {
     const user = await User.findOne({ licenseKey });
-
+    console.log('use', user);
     if (!user || !user.stripeSubscriptionId) {
       return res
         .status(404)

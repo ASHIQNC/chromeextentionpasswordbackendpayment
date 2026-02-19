@@ -5,6 +5,7 @@ const UserSchema = new mongoose.Schema({
   stripeCustomerId: String,
   isSubscribed: { type: Boolean, default: false },
   licenseKey: String,
+  //new variable added for cancelation subcription
   stripeSubscriptionId: String,
   updatedAt: { type: Date, default: Date.now },
 });
