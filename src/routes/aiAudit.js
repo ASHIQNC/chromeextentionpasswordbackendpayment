@@ -67,7 +67,9 @@ router.post('/analyze-password', async (req, res) => {
     }
 
     // 2. AI Processing
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-2.5-flash',
+    });
 
     const prompt = `Act as a security expert. I have a password pattern: "${passwordPattern}". 
     In exactly one sentence, tell the user why this specific pattern is vulnerable to hackers. 
