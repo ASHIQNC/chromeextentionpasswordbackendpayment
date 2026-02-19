@@ -119,15 +119,25 @@ router.post('/analyze-password', async (req, res) => {
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     // 1. UPDATED PROMPT: Requesting a structured, user-friendly response
-    const prompt = `Act as a friendly cybersecurity expert. 
-    Analyze this password pattern: "${passwordPattern}".
+    //workingprompt1
+    // const prompt = `Act as a friendly cybersecurity expert.
+    // Analyze this password pattern: "${passwordPattern}".
+
+    // Provide your response in exactly this format:
+    // EXPLANATION: (One simple sentence explaining why this pattern is risky for a normal user)
+    // ADVICE: (One actionable tip to make it better, like using a passphrase or adding symbols)
+
+    // Keep it friendly and do not use overly complex jargon. Do not mention specific passwords.`;
+
+    const prompt = `Act as a cybersecurity expert. Analyze this password pattern: "${passwordPattern}".
     
     Provide your response in exactly this format:
-    EXPLANATION: (One simple sentence explaining why this pattern is risky for a normal user)
-    ADVICE: (One actionable tip to make it better, like using a passphrase or adding symbols)
+    STATUS: (Either "STRONG" or "WEAK")
+    EXPLANATION: (One simple sentence explaining the security level)
+    ADVICE: (One tip for improvement)
+    EXAMPLE: (A new, unique example of a strong password using a similar but safer logic)
     
-    Keep it friendly and do not use overly complex jargon. Do not mention specific passwords.`;
-
+    Keep it friendly. If the status is STRONG, praise the user. Do not use specific passwords from the user in your response.`;
     const result = await model.generateContent(prompt);
     const response = await result.response;
 
