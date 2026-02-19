@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
-
+const Stripe = require('stripe');
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // Extension hits THIS: POST /api/payments/verify-key
 router.post('/verify-key', async (req, res) => {
   const { licenseKey } = req.body;
