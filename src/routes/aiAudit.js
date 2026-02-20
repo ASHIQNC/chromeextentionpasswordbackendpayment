@@ -117,7 +117,7 @@ router.post('/analyze-password', async (req, res) => {
     }
     // gemini-2.5-flash
     const model = genAI.getGenerativeModel({
-      model: 'gemini-2.0-flash',
+      model: 'gemini-3-flash-preview',
     });
 
     // 1. UPDATED PROMPT: Requesting a structured, user-friendly response
