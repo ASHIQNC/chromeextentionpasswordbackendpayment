@@ -115,8 +115,10 @@ router.post('/analyze-password', async (req, res) => {
         .status(403)
         .json({ success: false, message: 'Pro subscription required.' });
     }
-
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    // gemini-2.5-flash
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash-latest',
+    });
 
     // 1. UPDATED PROMPT: Requesting a structured, user-friendly response
     //workingprompt1
