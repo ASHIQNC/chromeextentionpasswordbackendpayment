@@ -139,6 +139,21 @@ router.post('/analyze-password', async (req, res) => {
 
     // Keep it friendly. If the status is STRONG, praise the user. Do not use specific passwords from the user in your response.`;
 
+    //     const prompt = `Act as a cybersecurity expert. Analyze this password pattern: "${passwordPattern}".
+
+    // CRITERIA FOR "STRONG":
+    // - At least 12 characters long.
+    // - Contains a mix of letters, numbers, and symbols.
+    // - Is not a simple sequence (like 123).
+
+    // Provide your response in exactly this format:
+    // STATUS: (If length >= 12 and has mixed types, output "STRONG", otherwise "WEAK")
+    // EXPLANATION: (One simple sentence explaining the security level)
+    // ADVICE: (One tip for improvement)
+    // EXAMPLE: (A new, unique example of a strong password)
+
+    // If the status is STRONG, praise the user's choice. Do not mention the user's actual password.`;
+
     const prompt = `Act as a cybersecurity expert. Analyze this password pattern: "${passwordPattern}".
 
 CRITERIA FOR "STRONG":
@@ -152,7 +167,12 @@ EXPLANATION: (One simple sentence explaining the security level)
 ADVICE: (One tip for improvement)
 EXAMPLE: (A new, unique example of a strong password)
 
-If the status is STRONG, praise the user's choice. Do not mention the user's actual password.`;
+STRICT RULES:
+1. Do NOT use backticks (\`) or quotes around the EXAMPLE.
+2. Provide ONLY the raw password string for the EXAMPLE line.
+3. If the status is STRONG, praise the user's choice. 
+4. Do not mention the user's actual password.`;
+
     const result = await model.generateContent(prompt);
     const response = await result.response;
 
